@@ -118,7 +118,7 @@ dotnet --version
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/CleanCity-BinSense.git
+git clone https://github.com/RX-kabir/CleanCity-BinSense.git
 cd CleanCity-BinSense
 ```
 
@@ -229,4 +229,5 @@ Displayed in Operator Dashboard & Public Map
 **CleanCity-BinSense**
 
 </div>
+
 
