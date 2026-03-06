@@ -1,0 +1,343 @@
+﻿:root {
+    --app-bg: #f5f7fb;
+    --card-bg: #ffffff;
+    --sidebar-bg: #0f172a; /* dark slate */
+    --sidebar-muted: #94a3b8; /* slate-400 */
+    --sidebar-active: #ffffff;
+    --primary: #2563eb; /* blue-600 */
+    --border: #e5e7eb; /* gray-200 */
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: var(--app-bg);
+}
+
+.app-wrapper {
+    min-height: 100vh;
+    display: flex;
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--sidebar-bg);
+    color: #fff;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 16px 12px;
+}
+
+.brand {
+    font-weight: 800;
+    letter-spacing: .3px;
+    font-size: 18px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .brand i {
+        color: #60a5fa;
+    }
+
+.sidebar .nav-link {
+    color: var(--sidebar-muted);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 3px 0;
+}
+
+    .sidebar .nav-link:hover {
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+    }
+
+    .sidebar .nav-link.active {
+        background: rgba(37,99,235,0.22);
+        color: var(--sidebar-active);
+        border: 1px solid rgba(37,99,235,0.30);
+    }
+
+.sidebar .section-title {
+    margin: 16px 10px 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: .8px;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.content {
+    padding: 18px;
+}
+
+.card-soft {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.btn-soft {
+    border-radius: 12px;
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        position: fixed;
+        left: -270px;
+        transition: left .2s ease;
+        z-index: 1030;
+    }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 1020;
+    }
+
+        .sidebar-backdrop.show {
+            display: block;
+        }
+}
+
+/* ---------------------------
+   AUTH (Identity) - Professional Login
+---------------------------- */
+
+.auth-body .card-soft {
+    border-radius: 18px;
+}
+
+.auth-login h1 {
+    font-size: 30px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 6px;
+    color: #0f172a;
+}
+
+.auth-login h2 {
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 14px;
+}
+
+.auth-login hr {
+    display: none;
+}
+
+/* Center the form and hide the external-login column */
+.auth-login .row {
+    justify-content: center;
+    margin-top: 8px;
+}
+
+    /* The login form column is col-md-4 in default Identity UI */
+    .auth-login .row > .col-md-4 {
+        width: 100%;
+        max-width: 460px;
+    }
+
+    /* The external login/info column is col-md-6 — hide it */
+    .auth-login .row > .col-md-6 {
+        display: none !important;
+    }
+
+/* Make the form look like a real product card */
+.auth-login form#account {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.auth-login .form-floating .form-control {
+    border-radius: 12px;
+}
+
+/* Make the submit button full-width and premium */
+.auth-login #login-submit {
+    width: 100%;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-weight: 800;
+    font-size: 15px;
+}
+
+/* Clean up links */
+.auth-login a {
+    text-decoration: none;
+}
+
+    /* Hide register + resend links (since you want role-based login only) */
+    .auth-login a[href*="/Identity/Account/Register"],
+    .auth-login a[href*="/Identity/Account/ResendEmailConfirmation"] {
+        display: none !important;
+    }
+
+/* Optional: keep forgot-password but make it subtle */
+.auth-login #forgot-password {
+    display: inline-block;
+    margin-top: 10px;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.auth-login form#account {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+}
+
+.auth-login #login-submit {
+    padding: 12px 14px;
+    font-weight: 800;
+    border-radius: 12px;
+}
+
+.auth-login .form-control {
+    border-radius: 12px;
+}
+.auth-login .form-control {
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.auth-login .form-label {
+    color: #0f172a;
+}
+
+.auth-login .form-check-input {
+    border-radius: 4px;
+}
+
+.table thead th {
+    font-weight: 800;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.table tbody tr:hover {
+    background: rgba(15, 23, 42, 0.03);
+}
+
+
+.map-legend {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+    font-size: 13px;
+}
+
+    .map-legend .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+
+
+    }
+
+
+.stop-pin .stop-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: #0f172a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 13px;
+    border: 2px solid white;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.20);
+}
+
+/* ---------- SmartWaste UI polish ---------- */
+
+.card-soft {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.btn-soft {
+    border-radius: 12px !important;
+}
+
+.icon-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+    border: 1px solid rgba(59, 130, 246, 0.20);
+}
+
+.nav-link.active {
+    font-weight: 700;
+}
+
+/* tables */
+.table > :not(caption) > * > * {
+    padding: .6rem .6rem;
+}
+
+.table thead th {
+    color: #475569;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: none;
+}
+
+/* headings */
+h1, h2, h3 {
+    color: #0f172a;
+}
+
+/* form labels */
+.form-label {
+    color: #334155;
+}

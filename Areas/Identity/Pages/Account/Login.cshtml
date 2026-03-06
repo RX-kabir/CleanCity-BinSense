@@ -1,0 +1,155 @@
+﻿@page
+@model SmartWaste.Web.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = Model.LoginAsTitle;
+}
+
+<div class="container py-3">
+    <div class="text-center mb-4">
+        <h1 class="fw-black text-dark mb-1" style="font-weight: 850; letter-spacing: -1.5px; font-size: 2rem;">@Model.LoginAsTitle</h1>
+        <p class="text-muted small fw-medium">Secure access to SmartWaste cloud</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-12" style="max-width: 420px;">
+            <div class="login-wrapper">
+                <form id="account" method="post" class="p-4 bg-white shadow-sm border rounded-4">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small py-2 mb-3 shadow-sm" style="border-radius: 12px;"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary mb-1" for="emailInput">Professional Email</label>
+                        <div class="input-group custom-input-group">
+                            <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                            <input id="emailInput"
+                                   asp-for="Input.Email"
+                                   class="form-control border-start-0 ps-0"
+                                   autocomplete="username"
+                                   placeholder="name@company.com" />
+                        </div>
+                        <span asp-validation-for="Input.Email" class="text-danger extra-small fw-medium"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary mb-1" for="passwordInput">Secret Password</label>
+                        <div class="input-group custom-input-group">
+                            <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                            <input id="passwordInput"
+                                   asp-for="Input.Password"
+                                   type="password"
+                                   class="form-control border-start-0 ps-0"
+                                   autocomplete="current-password"
+                                   placeholder="••••••••" />
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-danger extra-small fw-medium"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check custom-check">
+                            <input class="form-check-input shadow-none" asp-for="Input.RememberMe" />
+                            <label class="form-check-label small text-muted fw-medium" asp-for="Input.RememberMe">
+                                Stay signed in
+                            </label>
+                        </div>
+                        <a id="forgot-password" href="./ForgotPassword" class="text-decoration-none small fw-bold text-primary hover-underline">
+                            Reset?
+                        </a>
+                    </div>
+
+                    <button id="login-submit" type="submit" class="btn btn-dark w-100 py-2 fw-bold rounded-3 shadow-sm transition-all">
+                        Sign In <i class="bi bi-chevron-right ms-2 small"></i>
+                    </button>
+
+                    <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                </form>
+
+                <div class="text-center mt-4">
+                    <a href="/Auth" class="back-pill">
+                        <i class="bi bi-arrow-left"></i> Switch Role
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* High-End Refinements */
+    body {
+        background-color: #fcfcfd;
+        font-family: 'Inter', -apple-system, sans-serif;
+    }
+
+    /* Input Styling */
+    .custom-input-group {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+
+        .custom-input-group .form-control {
+            border-radius: 0 12px 12px 0;
+            padding: 0.7rem;
+            font-size: 0.95rem;
+            border-color: #e2e8f0;
+        }
+
+        .custom-input-group .input-group-text {
+            border-radius: 12px 0 0 12px;
+            border-color: #e2e8f0;
+            padding-left: 1rem;
+        }
+
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #3b82f6;
+    }
+
+    .custom-input-group:focus-within {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Checkbox */
+    .custom-check .form-check-input:checked {
+        background-color: #1e293b;
+        border-color: #1e293b;
+    }
+
+    /* Back Link Pill */
+    .back-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: #f1f5f9;
+        color: #64748b;
+        border-radius: 100px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+        .back-pill:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+    .extra-small {
+        font-size: 0.75rem;
+    }
+
+    .transition-all {
+        transition: all 0.2s;
+    }
+
+    .hover-underline:hover {
+        text-decoration: underline !important;
+    }
+
+    /* Shadow on form hover */
+    form:hover {
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08) !important;
+    }
+</style>

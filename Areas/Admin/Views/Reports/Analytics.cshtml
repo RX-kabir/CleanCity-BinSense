@@ -1,0 +1,205 @@
+﻿@using SmartWaste.Web.Areas.Admin.Models.Reports
+@model AnalyticsVm
+
+@{
+    ViewData["Title"] = "Analytics";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h2 class="mb-1">Analytics</h2>
+        <div class="text-muted">Operational insights for the selected date range.</div>
+    </div>
+
+    <a class="btn btn-outline-secondary btn-soft"
+       asp-area="Admin" asp-controller="Reports" asp-action="Index">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card-soft p-3 mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label fw-bold">From</label>
+            <input type="date" class="form-control" name="from" value="@Model.From.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-bold">To</label>
+            <input type="date" class="form-control" name="to" value="@Model.To.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-4 d-grid">
+            <button class="btn btn-primary btn-soft">
+                <i class="bi bi-funnel"></i> Apply
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- KPI cards -->
+<div class="row g-3 mb-3">
+    <div class="col-md-6 col-xl-3">
+        <div class="card-soft p-3">
+            <div class="text-muted" style="font-size:13px;">Total Pickups</div>
+            <div style="font-weight:900;font-size:26px;">@Model.TotalPickups</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card-soft p-3">
+            <div class="text-muted" style="font-size:13px;">Collected (Liters)</div>
+            <div style="font-weight:900;font-size:26px;">@Model.TotalCollectedLiters</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card-soft p-3">
+            <div class="text-muted" style="font-size:13px;">Overflow Alerts</div>
+            <div style="font-weight:900;font-size:26px;">@Model.OverflowAlerts</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card-soft p-3">
+            <div class="text-muted" style="font-size:13px;">Routes Created</div>
+            <div style="font-weight:900;font-size:26px;">@Model.TotalRoutes</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Trend chart -->
+    <div class="col-lg-7">
+        <div class="card-soft p-3">
+            <div class="fw-bold mb-2">Daily Pickup Trend</div>
+            <canvas id="trendChart" height="120"></canvas>
+        </div>
+    </div>
+
+    <!-- Top zones -->
+    <div class="col-lg-5">
+        <div class="card-soft p-3">
+            <div class="fw-bold mb-2">Top Zones (Collected Liters)</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th class="text-end">Liters</th>
+                            <th class="text-end">Pickups</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var z in Model.TopZones)
+                        {
+                            <tr>
+                                <td>@z.ZoneName</td>
+                                <td class="text-end">@z.TotalCollectedLiters</td>
+                                <td class="text-end">@z.PickupCount</td>
+                            </tr>
+                        }
+                        @if (!Model.TopZones.Any())
+                        {
+                            <tr><td colspan="3" class="text-muted">No data for selected range.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overflow bins -->
+    <div class="col-lg-6">
+        <div class="card-soft p-3">
+            <div class="fw-bold mb-2">Top Overflowing Bins</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Bin</th>
+                            <th>Zone</th>
+                            <th class="text-end">Overflow Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.TopOverflowBins)
+                        {
+                            <tr>
+                                <td>@b.Location (ID: @b.BinId)</td>
+                                <td>@b.ZoneName</td>
+                                <td class="text-end">@b.OverflowCount</td>
+                            </tr>
+                        }
+                        @if (!Model.TopOverflowBins.Any())
+                        {
+                            <tr><td colspan="3" class="text-muted">No overflow alerts in selected range.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Truck utilization -->
+    <div class="col-lg-6">
+        <div class="card-soft p-3">
+            <div class="fw-bold mb-2">Truck Utilization</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Truck</th>
+                            <th class="text-end">Routes</th>
+                            <th class="text-end">Stops</th>
+                            <th class="text-end">Completed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model.TruckUtilization)
+                        {
+                            <tr>
+                                <td>@t.RegistrationNo</td>
+                                <td class="text-end">@t.Routes</td>
+                                <td class="text-end">@t.TotalStops</td>
+                                <td class="text-end">@t.CompletedStops</td>
+                            </tr>
+                        }
+                        @if (!Model.TruckUtilization.Any())
+                        {
+                            <tr><td colspan="4" class="text-muted">No routes in selected range.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script>
+        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.Trend.Select(x => x.Day.ToString("MM-dd")).ToList()
+    ));
+
+        const pickupCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.Trend.Select(x => x.PickupCount).ToList()
+    ));
+
+        const ctx = document.getElementById('trendChart');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Pickups',
+                    data: pickupCounts,
+                    tension: 0.25
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                }
+            }
+        });
+    </script>
+}

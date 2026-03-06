@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Welcome";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // keep default public layout
+}
+
+<div class="container" style="padding-top:30px;">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-6">
+            <div class="card card-soft p-4" style="border-radius:18px;">
+                <h2 style="font-weight:900;">SmartWaste</h2>
+                <p style="color:#64748b; font-size:16px;">
+                    Smart Waste Management & Route Optimization System.
+                    Public users can view bins nearby. Staff can login to manage operations.
+                </p>
+
+                <div class="d-flex gap-2 flex-wrap mt-3">
+                    <a class="btn btn-primary btn-soft" href="/PublicMap">
+                        <i class="bi bi-geo-alt"></i> View Public Map
+                    </a>
+                    <a class="btn btn-outline-secondary btn-soft" href="/Admin/Routes">
+                        <i class="bi bi-eye"></i> Admin Panel (if logged in)
+                    </a>
+                </div>
+
+                <div style="margin-top:18px; padding:12px; border:1px solid #e5e7eb; border-radius:14px; background:#f8fafc;">
+                    <div style="font-weight:700;">Demo accounts</div>
+                    <div style="color:#64748b; font-size:14px;">
+                        Admin: <b>admin@smartwaste.local</b> / <b>Admin@12345</b><br />
+                        Operator/Driver accounts will be added in next sections.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card card-soft p-4" style="border-radius:18px;">
+                        <h4 style="font-weight:800;">Login Options</h4>
+                        <p style="color:#64748b;">Choose your role to login.</p>
+
+                        <div class="d-grid gap-2">
+                            <a class="btn btn-outline-primary btn-soft" href="/Identity/Account/Login?role=Admin">
+                                <i class="bi bi-shield-lock"></i> Login as Admin
+                            </a>
+                            <a class="btn btn-outline-primary btn-soft" href="/Identity/Account/Login?role=Operator">
+                                <i class="bi bi-clipboard-check"></i> Login as Operator
+                            </a>
+                            <a class="btn btn-outline-primary btn-soft" href="/Identity/Account/Login?role=Driver">
+                                <i class="bi bi-truck"></i> Login as Driver
+                            </a>
+                            <a class="btn btn-outline-success btn-soft" href="/PublicMap">
+                                <i class="bi bi-map"></i> Continue as Public (No Login)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card card-soft p-4" style="border-radius:18px;">
+                        <h5 style="font-weight:800;">What you can do</h5>
+                        <ul style="margin:0; color:#334155;">
+                            <li>Public: View nearby bins and fill levels</li>
+                            <li>Admin: Plan routes, monitor bins, view analytics reports</li>
+                            <li>Operator: Update readings and monitor zones</li>
+                            <li>Driver: Follow assigned routes and log pickups</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

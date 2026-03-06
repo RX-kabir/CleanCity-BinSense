@@ -1,0 +1,114 @@
+﻿@using SmartWaste.Web.Areas.Admin.Models.Reports
+@model ReportFilterVm
+
+@{
+    ViewData["Title"] = "Zone Waste Summary";
+    var rows = ViewBag.Rows as List<ZoneWasteRow> ?? new();
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h2 class="mb-1">Zone Waste Summary</h2>
+        <div class="text-muted">Daily waste collected (liters) grouped by zones.</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary btn-soft"
+           asp-area="Admin" asp-controller="Reports" asp-action="Index">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+
+        <a class="btn btn-outline-primary btn-soft"
+           asp-area="Admin" asp-controller="Reports" asp-action="ZoneSummaryCsv"
+           asp-route-from="@Model.From?.ToString("yyyy-MM-dd")"
+           asp-route-to="@Model.To?.ToString("yyyy-MM-dd")"
+           asp-route-zoneId="@Model.ZoneId">
+            <i class="bi bi-download"></i> Export CSV
+        </a>
+    </div>
+</div>
+
+<div class="card-soft p-3 mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label fw-bold">From</label>
+            <input type="date" class="form-control" name="from"
+                   value="@Model.From?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label fw-bold">To</label>
+            <input type="date" class="form-control" name="to"
+                   value="@Model.To?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Zone</label>
+            <select class="form-select" name="zoneId">
+                <option value="">All Zones</option>
+                @foreach (var z in Model.Zones)
+                {
+                    <option value="@z.Id" selected="@(Model.ZoneId == z.Id)">
+                        @z.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button class="btn btn-primary btn-soft">
+                <i class="bi bi-funnel"></i> Apply
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card-soft p-3">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="fw-bold">Results</div>
+        <div class="text-muted" style="font-size:13px;">
+            Rows: <b>@rows.Count</b>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="zoneTable" class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Zone</th>
+                    <th>Date</th>
+                    <th class="text-end">Collected (L)</th>
+                    <th class="text-end">Pickups</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in rows)
+                {
+                    <tr>
+                        <td>@r.ZoneName</td>
+                        <td>@r.ReportDate.ToString("yyyy-MM-dd")</td>
+                        <td class="text-end">@r.TotalCollectedLiters</td>
+                        <td class="text-end">@r.PickupCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- DataTables (CDN) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(function () {
+            $('#zoneTable').DataTable({
+                pageLength: 10,
+                order: [[1, 'desc']]
+            });
+        });
+    </script>
+}

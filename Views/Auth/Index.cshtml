@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Access";
+    Layout = "~/Views/Shared/_LayoutAuthSimple.cshtml";
+}
+
+<div class="text-center mb-3">
+    <h2 style="font-weight:900; margin-bottom:6px;">Choose Access Type</h2>
+    <div style="color:#64748b;">Login based on your role, or view the public map without login.</div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card-soft p-4 h-100">
+            <h5 style="font-weight:800;"><i class="bi bi-shield-lock"></i> Admin</h5>
+            <p style="color:#64748b;">Plan routes, manage operations, view analytics.</p>
+            <a class="btn btn-primary btn-soft w-100"
+               href="/Identity/Account/Login?ReturnUrl=/Admin/Dashboard">
+                Login as Admin
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card-soft p-4 h-100">
+            <h5 style="font-weight:800;"><i class="bi bi-clipboard-check"></i> Operator</h5>
+            <p style="color:#64748b;">Manage bins, update readings, monitor zones.</p>
+            <a class="btn btn-primary btn-soft w-100"
+               href="/Identity/Account/Login?ReturnUrl=/Operator/Dashboard">
+                Login as Operator
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card-soft p-4 h-100">
+            <h5 style="font-weight:800;"><i class="bi bi-truck"></i> Driver</h5>
+            <p style="color:#64748b;">View assigned routes and log pickups.</p>
+            <a class="btn btn-primary btn-soft w-100"
+               href="/Identity/Account/Login?ReturnUrl=/Driver/Dashboard">
+                Login as Driver
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card-soft p-4 h-100">
+            <h5 style="font-weight:800;"><i class="bi bi-geo-alt"></i> Public</h5>
+            <p style="color:#64748b;">View bins near your location (no login required).</p>
+            <a class="btn btn-outline-success btn-soft w-100" href="/ViewAsPublic">
+                  View as Public
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-3">
+    <a href="/" style="color:#64748b;">← Back to Home</a>
+</div>

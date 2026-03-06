@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Reports & Analytics";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Reports & Analytics</h2>
+            <p class="text-muted">Monitor operational performance and export data for your records.</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary btn-sm me-2">
+                <i class="bi bi-download me-1"></i> Export All Data
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="text-muted small fw-bold text-uppercase">Total Waste Today</div>
+                <div class="h4 fw-bold mb-0">12.5 Tons</div>
+                <div class="text-success small"><i class="bi bi-arrow-up"></i> 4% from yesterday</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="text-muted small fw-bold text-uppercase">Active Trucks</div>
+                <div class="h4 fw-bold mb-0">18 / 20</div>
+                <div class="text-muted small">90% Utilization</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="text-muted small fw-bold text-uppercase">Pending Alerts</div>
+                <div class="h4 fw-bold mb-0 text-danger">5</div>
+                <div class="text-muted small">Overflowing bins detected</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="text-muted small fw-bold text-uppercase">Efficiency Score</div>
+                <div class="h4 fw-bold mb-0">94%</div>
+                <div class="text-success small">On-track for monthly goal</div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4 opacity-25">
+
+    <h5 class="mb-3 fw-bold">Detailed Reports</h5>
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <a asp-area="Admin" asp-controller="Reports" asp-action="ZoneSummary" class="text-decoration-none text-dark h-100 d-block">
+                <div class="card border-0 shadow-sm h-100 hover-lift p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                            <i class="bi bi-geo-alt text-primary fs-4"></i>
+                        </div>
+                        <i class="bi bi-arrow-right text-muted"></i>
+                    </div>
+                    <h5 class="fw-bold">Zone Waste Summary</h5>
+                    <p class="text-muted mb-4">Analyze daily collection volumes per specific geographic zones. Perfect for balancing crew loads.</p>
+                    <div class="mt-auto pt-3 border-top">
+                        <span class="badge bg-light text-dark border">Filters: Date, Zone</span>
+                        <span class="badge bg-light text-dark border">Export: CSV, PDF</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-lg-4">
+            <a asp-area="Admin" asp-controller="Reports" asp-action="TruckSummary" class="text-decoration-none text-dark h-100 d-block">
+                <div class="card border-0 shadow-sm h-100 hover-lift p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-3">
+                            <i class="bi bi-truck text-success fs-4"></i>
+                        </div>
+                        <i class="bi bi-arrow-right text-muted"></i>
+                    </div>
+                    <h5 class="fw-bold">Truck Route Summary</h5>
+                    <p class="text-muted mb-4">Review route compliance and stops completed versus those planned. Monitor driver efficiency.</p>
+                    <div class="mt-auto pt-3 border-top">
+                        <span class="badge bg-light text-dark border">Filters: Route ID, Driver</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-lg-4">
+            <a asp-area="Admin" asp-controller="Reports" asp-action="Analytics" class="text-decoration-none text-dark h-100 d-block">
+                <div class="card border-0 shadow-sm h-100 hover-lift p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-3">
+                            <i class="bi bi-graph-up-arrow text-warning fs-4"></i>
+                        </div>
+                        <i class="bi bi-arrow-right text-muted"></i>
+                    </div>
+                    <h5 class="fw-bold">Analytics Insights</h5>
+                    <p class="text-muted mb-4">Visualized trends and KPI tracking. identify overflow hot-spots and predict future waste spikes.</p>
+                    <div class="mt-auto pt-3 border-top">
+                        <span class="badge bg-light text-dark border">Visual Charts</span>
+                        <span class="badge bg-light text-dark border">Heatmaps</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+        }
+</style>

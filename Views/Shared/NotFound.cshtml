@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Not Found";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+}
+
+<div class="card-soft p-4" style="max-width: 720px;">
+    <div class="d-flex align-items-center gap-3">
+        <div class="icon-badge">
+            <i class="bi bi-search"></i>
+        </div>
+        <div>
+            <h2 class="mb-1">Page not found (404)</h2>
+            <div class="text-muted">
+                The page you are trying to open does not exist or was moved.
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-primary btn-soft" href="/">
+            <i class="bi bi-house"></i> Go Home
+        </a>
+        <a class="btn btn-outline-secondary btn-soft" href="/PublicMap">
+            <i class="bi bi-geo-alt"></i> Public Map
+        </a>
+    </div>
+</div>

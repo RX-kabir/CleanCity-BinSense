@@ -1,0 +1,133 @@
+﻿@model List<SmartWaste.Web.Models.BinListRowVm>
+@{
+    ViewData["Title"] = "Bins Management";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml";
+    var zoneId = ViewBag.ZoneId as int?;
+    var statusId = ViewBag.StatusId as byte?;
+    var search = ViewBag.Search as string ?? "";
+}
+
+<div class="card-soft p-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <div style="font-weight:900; font-size:18px;">Bins Management</div>
+            <div style="color:#64748b;">Monitor latest fill levels and sensor status across all zones</div>
+        </div>
+        <a class="btn btn-primary btn-soft shadow-sm" href="/Operator/Readings/Add">
+            <i class="bi bi-plus-circle me-1"></i> Add Reading
+        </a>
+    </div>
+
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Msg"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form class="row g-2 mb-4" method="get">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input class="form-control border-start-0" name="search" value="@search" placeholder="Search location or ID..." />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <input class="form-control" name="zoneId" value="@(zoneId?.ToString() ?? "")" placeholder="Zone ID" type="number" />
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="statusId">
+                <option value="">All Statuses</option>
+                <option value="1" selected="@(statusId == 1)">OK</option>
+                <option value="2" selected="@(statusId == 2)">Needs Pickup</option>
+                <option value="3" selected="@(statusId == 3)">Overflowing</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-dark w-100" type="submit">Apply Filter</button>
+        </div>
+        <div class="col-md-2">
+            <a class="btn btn-outline-secondary w-100" href="/Operator/Bins">Reset</a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="bg-light">
+                <tr style="color:#64748b; font-size: 12px;" class="text-uppercase fw-bold">
+                    <th class="ps-3">ID</th>
+                    <th>Zone</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th style="width: 180px;">Fill Level</th>
+                    <th>Last Reading</th>
+                    <th class="text-end pe-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var b in Model)
+                {
+                    // Logic for status badge colors
+                    var statusBadge = b.BinStatusId switch
+                    {
+                        1 => "bg-success-subtle text-success border-success",
+                        2 => "bg-warning-subtle text-warning border-warning",
+                        3 => "bg-danger-subtle text-danger border-danger",
+                        _ => "bg-light text-muted"
+                    };
+
+                    var progressColor = b.BinStatusId switch
+                    {
+                        1 => "bg-success",
+                        2 => "bg-warning",
+                        3 => "bg-danger",
+                        _ => "bg-secondary"
+                    };
+
+                    <tr>
+                        <td class="ps-3 fw-bold text-muted">#@b.BinId</td>
+                        <td><span class="badge bg-light text-dark border">@b.ZoneName</span></td>
+                        <td>
+                            <div class="fw-bold">@b.Location</div>
+                            <div class="small text-muted">@b.WasteType</div>
+                        </td>
+                        <td>
+                            <span class="badge border @statusBadge" style="font-weight: 600;">
+                                @b.StatusName
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 6px;">
+                                    <div class="progress-bar @progressColor"
+                                         role="progressbar"
+                                         style="width: @(b.LatestFillLevelPercent ?? 0)%"></div>
+                                </div>
+                                <span class="small fw-bold">@(b.LatestFillLevelPercent?.ToString() ?? "0")%</span>
+                            </div>
+                        </td>
+                        <td class="small">
+                            <i class="bi bi-clock-history me-1 text-muted"></i>
+                            @(b.LastReadingTime?.ToLocalTime().ToString("MMM dd, HH:mm") ?? "N/A")
+                        </td>
+                        <td class="text-end pe-3">
+                            <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="/Operator/Readings/Add?binId=@b.BinId">
+                                <i class="bi bi-plus-lg"></i> Reading
+                            </a>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-search fs-2 d-block mb-2"></i>
+                            No bins found matching your criteria.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,85 @@
+﻿@{
+    string area = (ViewContext.RouteData.Values["area"]?.ToString() ?? "");
+    string controller = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "");
+    string action = (ViewContext.RouteData.Values["action"]?.ToString() ?? "");
+
+    bool IsActive(string a, string c) =>
+        string.Equals(area, a, StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(controller, c, StringComparison.OrdinalIgnoreCase);
+
+    bool IsPublicActive() => string.IsNullOrEmpty(area) && string.Equals(controller, "PublicMap", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="brand">
+    <i class="bi bi-recycle"></i>
+    <div>
+        SmartWaste
+        <div style="font-size:12px; font-weight:600; color: rgba(255,255,255,.60)">Management System</div>
+    </div>
+</div>
+
+<div class="section-title">Public</div>
+<a class="nav-link @(IsPublicActive() ? "active" : "")" href="/PublicMap">
+    <i class="bi bi-geo-alt"></i> Public Map
+</a>
+
+@if (User?.Identity?.IsAuthenticated ?? false)
+{
+    /*<div class="section-title">Account</div>
+    <a class="nav-link" href="/Identity/Account/Manage">
+        <i class="bi bi-person-circle"></i> Profile
+    </a>*/
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="section-title">Admin</div>
+        <a class="nav-link @(IsActive("Admin","Dashboard") ? "active" : "")" href="/Admin/Dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a class="nav-link @(IsActive("Admin","Routes") ? "active" : "")" href="/Admin/Routes">
+            <i class="bi bi-truck"></i> Routes
+        </a>
+        <a class="nav-link " href="/Admin/Routes/Plan">
+            <i class="bi bi-plus-circle"></i> Plan Route
+        </a>
+        <a class="nav-link @(IsActive("Admin","Reports") ? "active" : "")" href="/Admin/Reports">
+            <i class="bi bi-bar-chart-line"></i> Reports
+        </a>
+    }
+
+    @if (User.IsInRole("Operator"))
+    {
+        <div class="section-title">Operator</div>
+
+        <a class="nav-link" href="/Operator/Dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+
+        <a class="nav-link" href="/Operator/Bins">
+            <i class="bi bi-trash"></i> Bins
+        </a>
+
+        <a class="nav-link" href="/Operator/Readings/Add">
+            <i class="bi bi-plus-circle"></i> Add Reading
+        </a>
+    }
+
+
+
+    @if (User.IsInRole("Driver"))
+    {
+        <div class="section-title">Driver</div>
+        <a class="nav-link @(IsActive("Driver","Routes") ? "active" : "")" href="/Driver/Routes">
+            <i class="bi bi-list-check"></i> My Routes
+        </a>
+    }
+
+
+}
+else
+{
+    <div class="section-title">Access</div>
+    <a class="nav-link" href="/Identity/Account/Login">
+        <i class="bi bi-box-arrow-in-right"></i> Login
+    </a>
+}

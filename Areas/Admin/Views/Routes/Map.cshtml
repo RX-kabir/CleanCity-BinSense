@@ -1,0 +1,223 @@
+﻿@model SmartWaste.Web.Models.RouteMapPageViewModel
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Route Map";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="container-fluid pt-3">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2>Route Map (ID: @Model.RouteId)</h2>
+        <a class="btn btn-outline-secondary" href="/Admin/Routes"><i class="bi bi-arrow-left"></i> Back to List</a>
+    </div>
+
+    @if (TempData["Err"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Err"]</div>
+    }
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success">@TempData["Msg"]</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-md-3 col-xl-2">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Summary</h5>
+                    <hr />
+                    <p class="mb-1"><strong>Status:</strong> @Model.RouteStatus</p>
+                    <p class="mb-1"><strong>Date:</strong> @Model.RouteDate.ToString("yyyy-MM-dd")</p>
+                    <p class="mb-1"><strong>Truck:</strong> @Model.RegistrationNo</p>
+                    <p class="mb-3"><strong>Driver:</strong> @Model.DriverName</p>
+
+                    <div class="d-grid gap-2">
+                        @if (Model.RouteStatusId == 1)
+                        {
+                            <form method="post" action="/Admin/Routes/Start/@Model.RouteId">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-success w-100" type="submit">Start Route</button>
+                            </form>
+                        }
+                        @if (Model.RouteStatusId == 2)
+                        {
+                            <form method="post" action="/Admin/Routes/Complete/@Model.RouteId">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-danger w-100" type="submit">Complete Route</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold">Layers</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="toggleStops" checked />
+                        <label class="form-check-label" for="toggleStops">Route Stops</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="toggleBins" checked />
+                        <label class="form-check-label" for="toggleBins">Zone Bins</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body small">
+                    <h6 class="fw-bold">Legend</h6>
+                    <div class="mb-1"><span style="display:inline-block;width:10px;height:10px;background:#ffffff;border:1px solid #000;border-radius:50%;"></span> Pending</div>
+                    <div class="mb-1"><span style="display:inline-block;width:10px;height:10px;background:#2e7d32;border-radius:50%;"></span> Done/OK</div>
+                    <div class="mb-1"><span style="display:inline-block;width:10px;height:10px;background:#f57c00;border-radius:50%;"></span> Needs Pickup</div>
+                    <div class="mb-1"><span style="display:inline-block;width:10px;height:10px;background:#b00020;border-radius:50%;"></span> Overflowing</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9 col-xl-6">
+            <div id="map" style="height: 650px; width: 100%; border:1px solid #ccc; border-radius:8px;"></div>
+        </div>
+
+        <div class="col-md-12 col-xl-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Stops (@Model.CompletedStops / @Model.TotalStops)</h5>
+                </div>
+                <div class="card-body p-0 overflow-auto" style="max-height: 585px;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">#</th>
+                                <th>Location</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in Model.Stops.OrderBy(x => x.StopOrder))
+                            {
+                                <tr>
+                                    <td class="ps-3 fw-bold">@s.StopOrder</td>
+                                    <td>
+                                        <div class="fw-bold">@s.Location</div>
+                                        <div class="small text-muted">Planned: @(s.PlannedTime?.ToString("t") ?? "N/A")</div>
+                                    </td>
+                                    <td>
+                                        @if (s.ActualTime != null)
+                                        {
+                                            <span class="badge bg-success">Done</span>
+                                            <div class="small text-muted mt-1">@s.CollectedVolumeLiters L</div>
+                                        }
+                                        else if (Model.RouteStatusId == 2)
+                                        {
+                                            <form method="post" action="/Admin/Routes/LogPickup" class="d-flex gap-1">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="routeId" value="@Model.RouteId" />
+                                                <input type="hidden" name="routeStopId" value="@s.RouteStopId" />
+                                                <input class="form-control form-control-sm" style="width:70px;" type="number" step="0.1" name="volumeCollectedLiters" placeholder="Liters" required />
+                                                <button class="btn btn-sm btn-primary" type="submit">Log</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Pending Start</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        const routeId = @Model.RouteId;
+        const stops = @Html.Raw(JsonSerializer.Serialize(Model.Stops, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+
+        const map = L.map('map').setView([23.8103, 90.4125], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+        const stopsLayer = L.layerGroup().addTo(map);
+        const binsLayer = L.layerGroup().addTo(map);
+        let routeLine = null;
+
+        function makeNumberIcon(n, done) {
+            const bg = done ? "#2e7d32" : "#ffffff";
+            const textColor = done ? "#ffffff" : "#111111";
+            return L.divIcon({
+                className: "stop-number-icon",
+                html: `<div style="width:28px;height:28px;border-radius:14px;border:2px solid #111;background:${bg};color:${textColor};display:flex;align-items:center;justify-content:center;font-weight:700;">${n}</div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+        }
+
+        function drawRouteStops() {
+            stopsLayer.clearLayers();
+            const latlngs = [];
+            stops.slice().sort((a, b) => a.stopOrder - b.stopOrder).forEach(s => {
+                const done = !!s.actualTime;
+                const point = [s.latitude, s.longitude];
+                latlngs.push(point);
+
+                L.marker(point, { icon: makeNumberIcon(s.stopOrder, done) })
+                    .bindPopup(`<b>Stop #${s.stopOrder}</b><br>${s.location}`)
+                    .addTo(stopsLayer);
+            });
+
+            if (latlngs.length > 1) {
+                routeLine = L.polyline(latlngs, { color: "#90a4ae", weight: 3, dashArray: "6,6" }).addTo(stopsLayer);
+                map.fitBounds(routeLine.getBounds(), { padding: [20, 20] });
+            } else if (latlngs.length === 1) {
+                map.setView(latlngs[0], 16);
+            }
+        }
+
+        async function drawRealRouteLine() {
+            try {
+                const res = await fetch(`/Admin/Routes/RouteLine/${routeId}`);
+                if (!res.ok) return;
+                const realLine = await res.json();
+                if (!Array.isArray(realLine) || realLine.length < 2) return;
+
+                if (routeLine) {
+                    stopsLayer.removeLayer(routeLine);
+                }
+
+                routeLine = L.polyline(realLine, { color: "#1565c0", weight: 4 }).addTo(stopsLayer);
+                map.fitBounds(routeLine.getBounds(), { padding: [20, 20] });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadZoneBins() {
+            binsLayer.clearLayers();
+            try {
+                const res = await fetch(`/Admin/Routes/ZoneBins/${routeId}`);
+                if (!res.ok) return;
+                const bins = await res.json();
+                bins.forEach(b => {
+                    const color = b.binStatusId === 3 ? "#b00020" : (b.binStatusId === 2 ? "#f57c00" : "#2e7d32");
+                    L.circleMarker([b.latitude, b.longitude], {
+                        radius: 6, weight: 2, color: color, fillColor: color, fillOpacity: 0.7
+                    }).bindPopup(`<b>${b.location}</b><br>Fill: ${b.latestFillLevelPercent}%`).addTo(binsLayer);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        document.getElementById("toggleStops").addEventListener("change", (e) => e.target.checked ? map.addLayer(stopsLayer) : map.removeLayer(stopsLayer));
+        document.getElementById("toggleBins").addEventListener("change", (e) => e.target.checked ? map.addLayer(binsLayer) : map.removeLayer(binsLayer));
+
+        drawRouteStops();
+        await drawRealRouteLine();
+        await loadZoneBins();
+    });
+</script>

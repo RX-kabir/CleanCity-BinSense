@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Something went wrong";
+    Layout = "~/Views/Shared/_LayoutDashboard.cshtml";
+}
+
+<div class="card-soft p-4" style="max-width: 720px;">
+    <div class="d-flex align-items-center gap-3">
+        <div class="icon-badge" style="background: rgba(176,0,32,.12); color:#b00020; border-color: rgba(176,0,32,.18);">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div>
+            <h2 class="mb-1">Something went wrong</h2>
+            <div class="text-muted">
+                An unexpected error occurred. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-primary btn-soft" href="/">
+            <i class="bi bi-house"></i> Go Home
+        </a>
+        <a class="btn btn-outline-secondary btn-soft" href="javascript:history.back()">
+            <i class="bi bi-arrow-left"></i> Go Back
+        </a>
+    </div>
+</div>

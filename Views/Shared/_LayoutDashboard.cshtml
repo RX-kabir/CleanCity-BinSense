@@ -1,0 +1,81 @@
+﻿@using Microsoft.AspNetCore.Identity
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartWaste</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/app.css" />
+</head>
+<body style="background: var(--app-bg);">
+
+    <div class="d-flex" style="min-height:100vh;">
+        <!-- Sidebar -->
+        <div class="bg-white border-end" style="width:260px;">
+            <div class="p-3 border-bottom">
+                <div class="fw-bold" style="font-size:18px;">
+                    <i class="bi bi-recycle"></i> SmartWaste
+                </div>
+                <div class="text-muted" style="font-size:13px;">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <span>Admin Panel</span>
+                    }
+                    else if (User.IsInRole("Operator"))
+                    {
+                        <span>Operator Panel</span>
+                    }
+                    else if (User.IsInRole("Driver"))
+                    {
+                        <span>Driver Panel</span>
+                    }
+                </div>
+            </div>
+
+            <div class="p-2">
+                @await Html.PartialAsync("_Sidebar")
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="flex-grow-1">
+            <!-- Topbar -->
+            <div class="bg-white border-bottom">
+                <div class="container-fluid py-2 d-flex align-items-center justify-content-between">
+                    <div class="text-muted" style="font-size:13px;">
+                        @ViewData["Title"]
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted" style="font-size:13px;">
+                            <i class="bi bi-person-circle"></i> @User.Identity?.Name
+                        </span>
+
+                        <form method="post"
+                              asp-area="Identity"
+                              asp-page="/Account/Logout"
+                              asp-route-returnUrl="/Auth"
+                              class="d-inline">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm btn-soft">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="container-fluid py-4">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

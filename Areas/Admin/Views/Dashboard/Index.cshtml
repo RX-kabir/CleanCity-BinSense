@@ -1,0 +1,255 @@
+﻿@model SmartWaste.Web.Models.AdminDashboardVm
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+
+    var trendJson = JsonSerializer.Serialize(
+        Model.Trend.Select(x => new
+        {
+            day = x.Day.ToString("MMM dd"),
+            pickups = x.PickupsCount,
+            volume = x.VolumeLiters
+        })
+    );
+}
+
+<div class="container-fluid py-4">
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-4 d-flex flex-wrap gap-3 align-items-center justify-content-between bg-white rounded-4">
+                <div>
+                    <h2 class="fw-bold mb-1">System Overview</h2>
+                    <p class="text-muted mb-0"><i class="bi bi-clock-history me-1"></i> Last updated: @DateTime.Now.ToString("MMM dd, HH:mm")</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-primary px-4 py-2 shadow-sm rounded-pill" href="/Admin/Routes/Plan">
+                        <i class="bi bi-plus-circle me-1"></i> Plan New Route
+                    </a>
+                    <a class="btn btn-outline-dark px-4 py-2 rounded-pill" href="/PublicMap">
+                        <i class="bi bi-map me-1"></i> Live View
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-4 h-100 rounded-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Total Bins</div>
+                        <div class="h2 fw-black my-2">@Model.TotalBins</div>
+                    </div>
+                    <div class="p-3 bg-light rounded-3"><i class="bi bi-archive fs-4 text-dark"></i></div>
+                </div>
+                <div class="mt-2 small text-success">
+                    <i class="bi bi-check-circle-fill"></i> @Model.OkBins healthy sensors
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-4 h-100 rounded-4 border-start border-warning border-5">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Needs Pickup</div>
+                        <div class="h2 fw-black my-2 text-warning">@Model.NeedsPickupBins</div>
+                    </div>
+                    <div class="p-3 bg-warning bg-opacity-10 rounded-3"><i class="bi bi-exclamation-triangle fs-4 text-warning"></i></div>
+                </div>
+                <div class="mt-2 small text-muted">Awaiting route assignment</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-4 h-100 rounded-4 border-start border-danger border-5">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Overflowing</div>
+                        <div class="h2 fw-black my-2 text-danger">@Model.OverflowingBins</div>
+                    </div>
+                    <div class="p-3 bg-danger bg-opacity-10 rounded-3"><i class="bi bi-hazard fs-4 text-danger"></i></div>
+                </div>
+                <div class="mt-2 small text-danger fw-bold">Immediate Action Required</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-4 h-100 rounded-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase">Pickups Today</div>
+                        <div class="h2 fw-black my-2">@Model.PickupsToday</div>
+                    </div>
+                    <div class="p-3 bg-success bg-opacity-10 rounded-3"><i class="bi bi-droplet fs-4 text-success"></i></div>
+                </div>
+                <div class="mt-2 small text-success fw-bold">@Model.VolumeTodayLiters.ToString("N0") L collected</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Route Execution Today</h5>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small fw-bold">Completed</span>
+                            <span class="small fw-bold text-success">@Model.CompletedRoutes/@Model.RoutesToday</span>
+                        </div>
+                        <div class="progress" style="height: 12px;">
+                            @{
+                                var cPct = Model.RoutesToday > 0 ? (Model.CompletedRoutes * 100 / Model.RoutesToday) : 0;
+                            }
+                            <div class="progress-bar bg-success rounded-pill" style="width: @cPct%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small fw-bold">In Progress</span>
+                            <span class="small fw-bold text-primary">@Model.InProgressRoutes</span>
+                        </div>
+                        <div class="progress" style="height: 12px;">
+                            @{
+                                var iPct = Model.RoutesToday > 0 ? (Model.InProgressRoutes * 100 / Model.RoutesToday) : 0;
+                            }
+                            <div class="progress-bar bg-primary rounded-pill progress-bar-animated progress-bar-striped" style="width: @iPct%"></div>
+                        </div>
+                    </div>
+
+                    <div class="list-group list-group-flush mt-4">
+                        <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-0 py-1">
+                            <span class="text-muted">Planned Routes</span>
+                            <span class="badge bg-light text-dark border">@Model.PlannedRoutes</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-0 py-1">
+                            <span class="text-muted">Cancelled Routes</span>
+                            <span class="badge bg-light text-dark border">@Model.CancelledRoutes</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light rounded-3">
+                        <p class="small text-muted mb-0"><strong>Strategy:</strong> Optimization is currently prioritizing bins with <strong>70%</strong> fill level or higher.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h5 class="fw-bold mb-1">Pickups Trend</h5>
+                            <p class="text-muted small">Daily volume and frequency log (Last 7 days)</p>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <canvas id="pickupsChart" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Recent Pickups Log</h5>
+                    <a class="btn btn-light btn-sm rounded-pill px-3 fw-bold" href="/Admin/Reports">Full Report <i class="bi bi-chevron-right ms-1"></i></a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light text-muted small">
+                            <tr>
+                                <th class="ps-4">TIMESTAMP</th>
+                                <th>BIN ID</th>
+                                <th>LOCATION</th>
+                                <th>VEHICLE</th>
+                                <th>OPERATOR</th>
+                                <th class="text-end pe-4">VOLUME</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.RecentPickups.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-2 d-block mb-2"></i> No pickup events found today.
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var p in Model.RecentPickups)
+                                {
+                                    <tr>
+                                        <td class="ps-4">@p.PickupTime.ToLocalTime().ToString("HH:mm") <span class="text-muted ms-2">Today</span></td>
+                                        <td><span class="badge bg-light text-dark border fw-normal">#@p.BinId</span></td>
+                                        <td class="fw-semibold">@p.Location</td>
+                                        <td><i class="bi bi-truck text-muted me-2"></i>@p.RegistrationNo</td>
+                                        <td>@p.DriverName</td>
+                                        <td class="text-end pe-4 fw-bold text-primary">@p.VolumeCollectedLiters.ToString("0.##") L</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        const trend = @Html.Raw(trendJson);
+        const labels = trend.map(x => x.day);
+        const pickups = trend.map(x => x.pickups);
+        const volumes = trend.map(x => x.volume);
+
+        const ctx = document.getElementById("pickupsChart");
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Pickups',
+                    data: pickups,
+                    fill: true,
+                    backgroundColor: 'rgba(13, 110, 253, 0.05)',
+                    borderColor: '#0d6efd',
+                    pointBackgroundColor: '#0d6efd',
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { display: false },
+                        ticks: { font: { size: 10 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    </script>
+}

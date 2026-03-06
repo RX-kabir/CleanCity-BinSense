@@ -1,0 +1,120 @@
+﻿@model List<SmartWaste.Web.Models.DriverRouteRowVm>
+@{
+    ViewData["Title"] = "My Routes";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="card-soft border-0 shadow-sm p-4" style="border-radius: 20px;">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <div style="font-weight:900; font-size:24px;" class="text-dark">My Assigned Routes</div>
+                <div style="color:#64748b;">Review and manage your collection tasks for today and upcoming shifts.</div>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-success btn-soft px-4 rounded-pill shadow-sm" href="/PublicMap">
+                    <i class="bi bi-map-fill me-2"></i>Live Bin Map
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle border-top">
+                <thead class="bg-light">
+                    <tr style="color:#64748b; font-size: 13px;" class="text-uppercase fw-bold">
+                        <th class="ps-3 py-3">Route ID</th>
+                        <th>Assignment Date</th>
+                        <th>Vehicle</th>
+                        <th>Status</th>
+                        <th style="min-width: 200px;">Route Progress</th>
+                        <th class="text-end pe-3">Navigation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted fs-5">
+                                    <i class="bi bi-calendar-x d-block mb-2 fs-1 opacity-25"></i>
+                                    No routes assigned to you yet.
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var r in Model)
+                        {
+                            var progress = r.TotalStops == 0 ? 0 : (int)Math.Round((r.CompletedStops * 100.0) / r.TotalStops);
+
+                            // Status color logic
+                            var statusBadge = r.RouteStatus?.ToLower() == "completed" ? "bg-success-subtle text-success border-success" :
+                            r.RouteStatus?.ToLower() == "active" ? "bg-primary-subtle text-primary border-primary" :
+                            "bg-secondary-subtle text-muted border-secondary";
+
+                            <tr>
+                                <td class="ps-3 fw-black" style="font-weight: 800; font-size: 1.1rem;">#@r.RouteId</td>
+                                <td>
+                                    <div class="fw-bold text-dark">@r.RouteDate.ToString("MMM dd, yyyy")</div>
+                                    <small class="text-muted">Assigned Shift</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-truck text-muted me-2 fs-5"></i>
+                                        <span class="fw-bold text-dark">@r.RegistrationNo</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge border @statusBadge px-3 py-2 rounded-pill">
+                                        @r.RouteStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <small class="fw-bold text-muted">@progress% Complete</small>
+                                        <small class="text-muted">@r.CompletedStops / @r.TotalStops Stops</small>
+                                    </div>
+                                    <div class="progress shadow-sm" style="height:10px; border-radius:10px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated @(progress == 100 ? "bg-success" : "bg-primary")"
+                                             role="progressbar"
+                                             style="width:@progress%"></div>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <a class="btn btn-primary shadow-sm px-4 rounded-pill fw-bold" href="/Driver/Routes/Map/@r.RouteId">
+                                        <i class="bi bi-geo-alt-fill me-1"></i> Open Route
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-black {
+        font-weight: 900;
+    }
+
+    .bg-success-subtle {
+        background-color: #d1e7dd !important;
+    }
+
+    .bg-primary-subtle {
+        background-color: #cfe2ff !important;
+    }
+
+    .bg-secondary-subtle {
+        background-color: #e2e3e5 !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8fafc;
+        transition: 0.2s;
+    }
+</style>

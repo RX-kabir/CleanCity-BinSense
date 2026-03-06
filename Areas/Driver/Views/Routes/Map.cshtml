@@ -1,0 +1,164 @@
+﻿@model SmartWaste.Web.Models.DriverRouteDetailsVm
+@using System.Text.Json
+@{
+    ViewData["Title"] = $"Route #{Model.Header.RouteId}";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml";
+
+    var stopsJson = JsonSerializer.Serialize(Model.Stops.Select(s => new
+    {
+        routeStopId = s.RouteStopId,
+        stopOrder = s.StopOrder,
+        lat = (double)s.Latitude,
+        lng = (double)s.Longitude,
+        location = s.Location,
+        statusName = s.StatusName,
+        actualTime = s.ActualTime?.ToString("yyyy-MM-dd HH:mm"),
+        collected = s.CollectedVolumeLiters
+    }));
+}
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card-soft p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <div style="font-weight:900; font-size:18px;">Route #@Model.Header.RouteId</div>
+                <div style="color:#64748b;">
+                    Date: @Model.Header.RouteDate.ToString("yyyy-MM-dd") • Truck: @Model.Header.RegistrationNo • Status: @Model.Header.RouteStatus
+                </div>
+            </div>
+            <a class="btn btn-outline-secondary btn-soft" href="/Driver/Routes"><i class="bi bi-arrow-left"></i> Back</a>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card-soft p-3">
+            <div style="font-weight:900;">Route Map</div>
+            <div style="color:#64748b;">Stops plotted in order</div>
+            <div id="map" style="height:420px; border-radius:16px; overflow:hidden;" class="mt-3"></div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card-soft p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div style="font-weight:900;">Stops</div>
+                    <div style="color:#64748b;">Log pickup when completed</div>
+                </div>
+                @if (TempData["Msg"] != null)
+                {
+                    <span class="badge text-bg-success">@TempData["Msg"]</span>
+                }
+            </div>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr style="color:#64748b;">
+                            <th>#</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model.Stops.OrderBy(x => x.StopOrder))
+                        {
+                            var done = s.ActualTime != null;
+                            <tr>
+                                <td>@s.StopOrder</td>
+                                <td>@s.Location</td>
+                                <td>
+                                    @if (done)
+                                    {
+                                        <span class="badge text-bg-success">Done</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-warning">Pending</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (done)
+                                    {
+                                        <span style="color:#64748b; font-size:12px;">@s.ActualTime?.ToLocalTime().ToString("HH:mm")</span>
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-sm btn-primary btn-soft"
+                                           href="/Driver/Routes/LogPickup?routeStopId=@s.RouteStopId&routeId=@Model.Header.RouteId&binLocation=@Uri.EscapeDataString(s.Location)">
+                                            Log Pickup
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <script>
+        (async () => {
+        const stops = @Html.Raw(stopsJson);
+
+        const center = stops.length ? [stops[0].lat, stops[0].lng] : [23.8103, 90.4125];
+        const map = L.map('map').setView(center, 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        const latlngs = [];
+
+        stops.sort((a,b)=>a.stopOrder-b.stopOrder).forEach(s => {
+            const ll = [s.lat, s.lng];
+            latlngs.push(ll);
+
+            const label = `${s.stopOrder}. ${s.location}<br/>${s.actualTime ? "✅ Done" : "⏳ Pending"}`;
+                    const icon = L.divIcon({
+            className: "stop-pin",
+            html: `<div class="stop-badge">${s.stopOrder}</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+        });
+
+        L.marker(ll, { icon }).addTo(map).bindPopup(label);
+
+        });
+
+        let routeLine = null;
+
+        if (latlngs.length > 1) {
+            routeLine = L.polyline(latlngs, { color: "#90a4ae", weight: 3, dashArray: "6,6" }).addTo(map);
+            map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
+        }
+
+        async function drawRealRouteLine() {
+            try {
+                const res = await fetch(`/Driver/Routes/RouteLine/@Model.Header.RouteId`);
+                if (!res.ok) return;
+                const realLine = await res.json();
+                if (!Array.isArray(realLine) || realLine.length < 2) return;
+
+                if (routeLine) {
+                    map.removeLayer(routeLine);
+                }
+
+                routeLine = L.polyline(realLine, { color: "#1565c0", weight: 4 }).addTo(map);
+                map.fitBounds(routeLine.getBounds(), { padding: [30,30] });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        await drawRealRouteLine();
+        })();
+    </script>
+}

@@ -1,0 +1,38 @@
+﻿@model SmartWaste.Web.Models.SqlTableResult
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<h2>@Model.Title</h2>
+<a href="/Admin/Reports">Back to Reports</a>
+
+@if (Model.Rows.Count == 0)
+{
+    <p style="margin-top:12px;">No data found.</p>
+}
+else
+{
+    <div style="overflow:auto; margin-top:12px;">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    @foreach (var c in Model.Columns)
+                    {
+                        <th>@c</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        @foreach (var cell in r)
+                        {
+                            <td>@cell</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

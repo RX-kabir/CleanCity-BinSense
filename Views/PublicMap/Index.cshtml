@@ -1,0 +1,275 @@
+﻿@{
+    ViewData["Title"] = "Public Bin Map";
+    Layout = "~/Views/Shared/_LayoutPublic.cshtml";
+}
+
+<div class="row g-3">
+    <!-- Left: Controls -->
+    <div class="col-lg-4">
+        <div class="card-soft p-3">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="fw-bold" style="font-size:18px;">Bin Map</div>
+                    <div class="text-muted" style="font-size:13px;">
+                        View bins near you with live fill level & status.
+                    </div>
+                </div>
+                <span class="badge rounded-pill bg-light text-dark border" id="lastUpdated">—</span>
+            </div>
+
+            <hr class="my-3" />
+
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-soft" id="btnLocate">
+                    <i class="bi bi-geo-alt"></i> Use My Location
+                </button>
+
+                <button class="btn btn-outline-secondary btn-soft" id="btnDhaka">
+                    <i class="bi bi-pin-map"></i> Center to Dhaka
+                </button>
+            </div>
+
+            <div class="mt-3">
+                <label class="form-label fw-bold">Radius (km)</label>
+                <input type="number" id="radiusKm" value="2" min="0.2" step="0.2" class="form-control" />
+                <div class="text-muted mt-1" style="font-size:12px;">
+                    Searches bins within the selected radius.
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <label class="form-label fw-bold">Status</label>
+                <select id="statusFilter" class="form-select">
+                    <option value="all">All</option>
+                    <option value="1">OK</option>
+                    <option value="2">NeedsPickup</option>
+                    <option value="3">Overflowing</option>
+                </select>
+            </div>
+
+            <div class="mt-3">
+                <div class="fw-bold mb-2">Legend</div>
+                <div class="d-flex flex-column gap-2" style="font-size:13px; color:#475569;">
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2e7d32;"></span>
+                        OK (Normal)
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f57c00;"></span>
+                        Needs Pickup
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#b00020;"></span>
+                        Overflowing (Urgent)
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-3" />
+
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="text-muted" style="font-size:13px;">
+                    <i class="bi bi-info-circle"></i>
+                    <span id="info">Loading…</span>
+                </div>
+
+                <span class="badge bg-light text-dark border" id="binCount">0 bins</span>
+            </div>
+        </div>
+
+        <div class="text-muted mt-2" style="font-size:12px;">
+            Tip: Allow location permission for best results. If denied, we show Dhaka by default.
+        </div>
+    </div>
+
+    <!-- Right: Map -->
+    <div class="col-lg-8">
+        <div class="card-soft p-2">
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            <div id="map" style="height: 690px; width: 100%; border-radius:12px;"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    const DEFAULT_LAT = 23.8103;
+    const DEFAULT_LNG = 90.4125;
+
+    const map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    const binsLayer = L.layerGroup().addTo(map);
+
+    let userMarker = null;
+    let radiusCircle = null;
+    let currentCenter = { lat: DEFAULT_LAT, lng: DEFAULT_LNG };
+
+    function setLastUpdated(dateText) {
+        const el = document.getElementById("lastUpdated");
+        el.innerText = dateText || "—";
+    }
+
+    function setInfo(text) {
+        document.getElementById("info").innerText = text;
+    }
+
+    function setCount(n) {
+        document.getElementById("binCount").innerText = `${n} bins`;
+    }
+
+    function binColor(statusId) {
+        if (statusId === 3) return "#b00020";
+        if (statusId === 2) return "#f57c00";
+        return "#2e7d32";
+    }
+
+    function drawRadius(lat, lng, radiusKm) {
+        if (radiusCircle) map.removeLayer(radiusCircle);
+        radiusCircle = L.circle([lat, lng], {
+            radius: radiusKm * 1000
+        }).addTo(map);
+    }
+
+    function formatLastUpdated(bins) {
+        // Find newest reading time
+        const times = bins
+            .filter(b => b.lastReadingTime)
+            .map(b => new Date(b.lastReadingTime).getTime());
+
+        if (!times.length) return "No readings";
+
+        const newest = new Date(Math.max(...times));
+        return `Updated: ${newest.toLocaleString()}`;
+    }
+
+    function addBin(b) {
+        const color = binColor(b.binStatusId);
+
+        const lastText = b.lastReadingTime
+            ? new Date(b.lastReadingTime).toLocaleString()
+            : "N/A";
+
+        const popup = `
+            <div style="min-width:220px;">
+                <div style="font-weight:800;">${b.location}</div>
+                <div style="color:#64748b;font-size:12px;">Waste: ${b.wasteType} • Capacity: ${b.capacityLiters} L</div>
+                <hr style="margin:8px 0;" />
+                <div>Status: <b>${b.statusName}</b></div>
+                <div>Fill: <b>${b.latestFillLevelPercent}%</b></div>
+                <div>Distance: <b>${b.distanceKm} km</b></div>
+                <div style="color:#64748b;font-size:12px;margin-top:6px;">
+                    Last reading: ${lastText}
+                </div>
+            </div>
+        `;
+
+        L.circleMarker([b.latitude, b.longitude], {
+            radius: 7,
+            weight: 2,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.8
+        }).bindPopup(popup).addTo(binsLayer);
+    }
+
+    async function loadBins(lat, lng) {
+        currentCenter = { lat, lng };
+
+        const radiusKm = parseFloat(document.getElementById("radiusKm").value || "2");
+        const statusFilter = document.getElementById("statusFilter").value;
+
+        setInfo("Loading bins…");
+        binsLayer.clearLayers();
+        setCount(0);
+
+        drawRadius(lat, lng, radiusKm);
+
+        const res = await fetch(`/api/public/bins?lat=${lat}&lng=${lng}&radiusKm=${radiusKm}`);
+        if (!res.ok) {
+            setInfo("Failed to load bins");
+            return;
+        }
+
+        let bins = await res.json();
+
+        if (statusFilter !== "all") {
+            const id = parseInt(statusFilter);
+            bins = bins.filter(b => b.binStatusId === id);
+        }
+
+        bins.forEach(addBin);
+
+        setCount(bins.length);
+        setInfo(`Showing bins within ${radiusKm} km`);
+        setLastUpdated(formatLastUpdated(bins));
+
+        // Fit to bins if available
+        if (bins.length > 0) {
+            const bounds = L.latLngBounds(bins.map(b => [b.latitude, b.longitude]));
+            map.fitBounds(bounds, { padding: [30, 30] });
+        } else {
+            map.setView([lat, lng], 13);
+        }
+    }
+
+    function useMyLocation() {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by this browser.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+
+                if (userMarker) map.removeLayer(userMarker);
+                userMarker = L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup("You are here")
+                    .openPopup();
+
+                map.setView([lat, lng], 14);
+                await loadBins(lat, lng);
+            },
+            () => {
+                alert("Location permission denied or unavailable. Showing Dhaka (default).");
+                centerDhaka();
+            }
+        );
+    }
+
+    function centerDhaka() {
+        if (userMarker) {
+            map.removeLayer(userMarker);
+            userMarker = null;
+        }
+        map.setView([DEFAULT_LAT, DEFAULT_LNG], 13);
+        loadBins(DEFAULT_LAT, DEFAULT_LNG);
+    }
+
+    document.getElementById("btnLocate").addEventListener("click", useMyLocation);
+    document.getElementById("btnDhaka").addEventListener("click", centerDhaka);
+
+    // Debounce radius input
+    let radiusTimer = null;
+    document.getElementById("radiusKm").addEventListener("input", () => {
+        clearTimeout(radiusTimer);
+        radiusTimer = setTimeout(() => {
+            loadBins(currentCenter.lat, currentCenter.lng);
+        }, 350);
+    });
+
+    document.getElementById("statusFilter").addEventListener("change", () => {
+        loadBins(currentCenter.lat, currentCenter.lng);
+    });
+
+    // Initial load (Dhaka default)
+    loadBins(DEFAULT_LAT, DEFAULT_LNG);
+    setInfo("Showing Dhaka by default. Click 'Use My Location' for your area.");
+</script>

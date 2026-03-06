@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartWaste</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/app.css" />
+</head>
+@{
+    var path = Context.Request.Path.Value?.ToLower() ?? "";
+    var isLogin = path.Contains("/identity/account/login");
+    var isGateway = path == "/auth" || path.StartsWith("/auth/");
+    var bodyClass = "auth-body" + (isLogin ? " auth-login" : "") + (isGateway ? " auth-gateway" : "");
+}
+<body class="@bodyClass" style="background: var(--app-bg);">
+
+    <div class="container" style="max-width: 980px; padding-top: 55px;">
+        <div class="text-center mb-4">
+            <div style="font-weight:900; font-size:22px; color:#0f172a;">
+                <i class="bi bi-recycle"></i> SmartWaste
+            </div>
+            <div style="color:#64748b;">Authentication</div>
+        </div>
+
+        @* ✅ For LOGIN page: no big wrapper card (login page will render its own clean card) *@
+        @if (isLogin)
+        {
+            @RenderBody()
+        }
+        else
+        {
+            <div class="card-soft p-4">
+                @RenderBody()
+            </div>
+        }
+
+        <div class="text-center mt-3" style="color:#64748b; font-size:13px;">
+            SmartWaste © @DateTime.Now.Year
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

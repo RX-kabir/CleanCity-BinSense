@@ -1,0 +1,128 @@
+﻿@model SmartWaste.Web.Models.OperatorDashboardVm
+@{
+    ViewData["Title"] = "Operator Dashboard";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml";
+}
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card-soft p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <div style="font-weight:900; font-size:18px;">Operator Dashboard</div>
+                <div style="color:#64748b;">Monitor bin health and log readings</div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-primary btn-soft" href="/Operator/Readings/Add">
+                    <i class="bi bi-plus-circle"></i> Add Reading
+                </a>
+                <a class="btn btn-outline-secondary btn-soft" href="/Operator/Bins">
+                    <i class="bi bi-trash"></i> View Bins
+                </a>
+                <a class="btn btn-outline-success btn-soft" href="/PublicMap">
+                    <i class="bi bi-map"></i> View Map
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card-soft p-3">
+            <div style="color:#64748b;" class="small fw-bold text-uppercase">Total Bins</div>
+            <div style="font-weight:900; font-size:28px;">@Model.TotalBins</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-soft p-3 border-start border-success border-4">
+            <div style="color:#64748b;" class="small fw-bold text-uppercase">OK Status</div>
+            <div style="font-weight:900; font-size:28px;" class="text-success">@Model.OkBins</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-soft p-3 border-start border-warning border-4">
+            <div style="color:#64748b;" class="small fw-bold text-uppercase">Needs Pickup</div>
+            <div style="font-weight:900; font-size:28px;" class="text-warning">@Model.NeedsPickupBins</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-soft p-3 border-start border-danger border-4">
+            <div style="color:#64748b;" class="small fw-bold text-uppercase">Overflowing</div>
+            <div style="font-weight:900; font-size:28px;" class="text-danger">@Model.OverflowingBins</div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card-soft p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <div style="font-weight:900;">Bins Needing Attention</div>
+                    <div style="color:#64748b;">Showing priority bins (Needs Pickup / Overflowing)</div>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-light text-dark border">Readings Today: @Model.ReadingsToday</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr style="color:#64748b; font-size: 12px;" class="text-uppercase">
+                            <th>ID</th>
+                            <th>Location</th>
+                            <th>Zone</th>
+                            <th>Status</th>
+                            <th style="width: 150px;">Fill Level</th>
+                            <th>Last Reading</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.AttentionBins.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
+                                    All bins are currently within capacity.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var b in Model.AttentionBins)
+                            {
+                                var statusClass = b.BinStatusId == 3 ? "text-bg-danger" : "text-bg-warning";
+                                var progressClass = b.BinStatusId == 3 ? "bg-danger" : "bg-warning";
+
+                                <tr>
+                                    <td class="fw-bold">#@b.BinId</td>
+                                    <td>
+                                        <div class="fw-bold">@b.Location</div>
+                                        <div class="small text-muted">@b.WasteType</div>
+                                    </td>
+                                    <td>@b.ZoneName</td>
+                                    <td><span class="badge @statusClass">@b.StatusName</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar @progressClass" role="progressbar"
+                                                     style="width: @(b.LatestFillLevelPercent ?? 0)%"></div>
+                                            </div>
+                                            <span class="small fw-bold">@(b.LatestFillLevelPercent?.ToString() ?? "0")%</span>
+                                        </div>
+                                    </td>
+                                    <td class="small text-muted">
+                                        @(b.LastReadingTime?.ToLocalTime().ToString("MMM dd, HH:mm") ?? "Never")
+                                    </td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-primary shadow-sm" href="/Operator/Readings/Add?binId=@b.BinId">
+                                            <i class="bi bi-plus-lg"></i> Log
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
