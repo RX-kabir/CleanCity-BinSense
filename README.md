@@ -10,7 +10,6 @@ ASP.NET Core MVC platform for **IoT-enabled waste monitoring**, **route optimiza
 ![ASP.NET Core](https://img.shields.io/badge/ASP.NET-Core-blue)
 ![SQL Server](https://img.shields.io/badge/Database-SQL%20Server-red)
 ![Project](https://img.shields.io/badge/Status-Active-success)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 </div>
 
@@ -230,3 +229,4 @@ Displayed in Operator Dashboard & Public Map
 **CleanCity-BinSense**
 
 </div>
+
